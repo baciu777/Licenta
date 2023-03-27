@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Python Flask Upload and Crop Image</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Handwritten Words Recognition</h1>
+      {% with messages = get_flashed_messages() %}
+      {% if messages %}
+      <ul>
+        {% for message in messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+      {% endwith %}
+      {% if filename %}
+      <h2>Step 1: Crop the image</h2>
+      <div class="row">
+        <div class="col-md-6">
+          <div id="upload-demo"></div>
+        </div>
+        <div class="col-md-6">
+          <div id="preview-crop-image"></div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6">
+          <button class="btn btn-success btn-block" id="crop-image">Crop Image</button>
+        </div>
+      </div>
+      {% endif %}
+      <h2>Step 2: Upload the cropped image</h2>
+      <div class="row">
+        <form method="post" action="/" enctype="multipart/form-data">
+          <dl>
+            <p>
+              <input type="file" name="file" class="form-control" autocomplete="off" required>
+            </p>
+          </dl>
+          <div id="cropped-image-container"></div>
+          <p>
+            <input type="submit" value="Submit" class="btn btn-info">
+          </p>
+        </form>
+      </div>
+      <p>{{predict}}</p>
+    </div>
+    <script>
+      var resize = $('#upload-demo').croppie({
+        enableExif: true,
+        viewport: {
+          width: 400,
+          height: 200,
+          type: 'square'
+        },
+        boundary: {
+          width: 400,
+          height: 400
+        }
+      });
+      $('#crop-image').click(function(event) {
+        resize.croppie('result', {
+          type: 'canvas',
+          size: 'viewport'
+        }).then(function(response) {
+          $('#preview-crop-image').html('<img src="' + response + '">');
+          $('#cropped-image-container').html('<input type="hidden" name="cropped_image" value="' + response + '">');
+        });
+      });
+    </script>
+  </body>
+</html>
