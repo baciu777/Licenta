@@ -25,6 +25,7 @@ class Predict:
         self.test_data=test_data
 
     def img_predict(self,file_path):
+
         img = self.preprocessor.preprocess_data(file_path)
         img = img.T
 
@@ -38,7 +39,9 @@ class Predict:
         # use CTC decoder
 
         pred_texts = self.decode_label(net_out_value)
-        #pred_texts = self.decode_label_keras(net_out_value)
+
+
+        #red_texts = self.decode_label_keras(net_out_value)#mult mai lent cu kerasescu
         #e fara corectie vezi
 
 
@@ -53,133 +56,51 @@ class Predict:
         for c in out_best:
             if c < len(self.char_list):
                 outstr += self.char_list[c]
-        return outstr
+        spell=SpellChecker()
+        outstr1=spell.correction(outstr)
+        if outstr1 is None:
+            outstr1=outstr
+
+        return outstr1
+
+    def has_consecutive_duplicate(self,string):
+        for i in range(1, len(string)):
+            if string[i] == string[i - 1]:
+                return True
+        return False
 
     def decode_label_keras(self, out):
-        #out1 = K.get_value(
-        #    K.ctc_decode(out[:, -30:, :], input_length=np.ones(out.shape[0]) * 30,
-        #                 greedy=False,beam_width=1000)[0][0])
-        #print(out1.shape)
-
-        out2 = K.get_value(
+        out1 = K.get_value(
             K.ctc_decode(out[:, -30:, :], input_length=np.ones(out.shape[0]) * 30,
-                         greedy=True)[0][0])
-        
-        # see the results
-
+                         greedy=True,)[0][0])
+        #print(out1.shape)
         outstr = ''
-        #for p in out1[0]:
-        #    if int(p) != -1:
-        #        outstr += self.char_list[p]
-        #print("false "+ outstr)
-
-        outstr = ''
-        for p in out2[0]:
+        for p in out1[0]:
             if int(p) != -1:
                 outstr += self.char_list[p]
+        if self.has_consecutive_duplicate(outstr) is False:
+            print("da")
+            out2 = K.get_value(
+            K.ctc_decode(out[:, -30:, :], input_length=np.ones(out.shape[0]) * 30,
+                       greedy=False,beam_width=100,top_paths=1)[0][0])
+            outstr = ''
+            for p in out2[0]:
+                if int(p) != -1:
+                    outstr += self.char_list[p]
+        # see the results
+
+
+
         #spell=SpellChecker()
 
         #print("true "+spell.correction(outstr))
         return outstr
 
 
-    def dilate_from_black(self,image,size_1,size_2):
-        kernel = np.ones((size_1,size_2), np.uint8)
-        dilated1 = cv2.dilate(image, kernel, iterations=1)
-        return dilated1
-
-    def spot_lines(self, dilated1, img):
-        img=img.copy()
-        (contours, heirarchy) = cv2.findContours(dilated1.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-        sorted_contours_lines = sorted(contours, key=lambda ctr: cv2.boundingRect(ctr)[1])  # (x, y, w, h)
-
-        for ctr in sorted_contours_lines:
-            x, y, w, h = cv2.boundingRect(ctr)
-            cv2.rectangle(img, (x, y), (x + w, y + h), (40, 100, 250), 2)
-        return img,sorted_contours_lines
-
-    def word_image(self,x,y,word,img3):
-        x2, y2, w2, h2 = cv2.boundingRect(word)
-        image=[x + x2, y + y2, x + x2 + w2, y + y2 + h2]
-        cv2.rectangle(img3, (x + x2, y + y2), (x + x2 + w2, y + y2 + h2), (255, 255, 100), 2)
-        return image
-    def sorted_contour_words(self,line,dilated2):
-        # roi of each line
-        x, y, w, h = cv2.boundingRect(line)
-        roi_line = dilated2[y:y + h, x:x + w]
-
-        # draw contours on each word
-        (cnt, heirarchy) = cv2.findContours(roi_line.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-        sorted_contour_words = sorted(cnt, key=lambda cntr: cv2.boundingRect(cntr)[0])
-        return x,y,sorted_contour_words
-
-    def crop(self,image):
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        blur = cv2.medianBlur(gray, 5)
-        thresh = cv2.adaptiveThreshold(blur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 8)
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
-        dilate = cv2.dilate(thresh, kernel, iterations=6)
-        cnts = cv2.findContours(dilate, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        cnts = cnts[0] if len(cnts) == 2 else cnts[1]
-        cnts = sorted(cnts, key=cv2.contourArea, reverse=True)
-        ROI=image#--------------------
-        for c in cnts:
-            x, y, w, h = cv2.boundingRect(c)
-            ROI = image[y:y + h, x:x + w]
-            cv2.imwrite('../src/predictions/a.png', ROI)
-            break
-        return ROI
-
-    def black_and_white(self,image):
-        # black and white
-
-        im_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        (thresh, im_bw) = cv2.threshold(im_gray, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)###128 sau 0???
-        m=im_bw
-
-
-        # Save the black and white image
-        #cv2.imwrite("../src/predictions/aba.jpg", im_bw)
-
-        return m#----------------------------------------------------------------
-
-    def white_pen_black_background(self,image):
-        # black and white
-
-        white_black_img = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        T = threshold_local(white_black_img, 11, offset=10, method="gaussian")
-        warped = (white_black_img > T).astype("uint8") * 255
-        #kernel = np.ones((1, 1), np.uint8)
-        #opening = cv2.morphologyEx(warped, cv2.MORPH_OPEN, kernel)
-        #kernel = np.ones((1, 1), np.uint8)
-        #white_black_img = cv2.dilate(warped, kernel, iterations=1)
-
-        (thresh, im_bw) = cv2.threshold(warped, 80, 255, cv2.THRESH_BINARY_INV)#//////////////////80
-
-        return im_bw
-
-    def increase_lines_width(self,imgContrast):
-
-        # increase line width
-        kernel = np.ones((3,3), np.uint8)# era 1---2
-
-        imgMorph = cv2.erode(imgContrast, kernel, iterations=1)
-
-        #imgMorph=imgContrast
-
-
-
-
-
-
-
-        return imgMorph
-
-
 
     def testing(self):
         """
-        here we test our model
+        here we test our models
         """
         words_error = 0
         words_nr = 0
@@ -187,8 +108,8 @@ class Predict:
         chars_nr = 0
         for content, image in self.test_data:#/////////////
             prediction = self.img_predict(image)
-            print(prediction)
             print(content)
+            print(prediction)
             print("-------------")
             if content != prediction:
                 words_error += 1

@@ -18,7 +18,7 @@ tf.compat.v1.disable_eager_execution()
 
 
 class ModelIAM:
-    """Minimalistic TF model for HTR."""
+    """Minimalistic TF models for HTR."""
 
     def __init__(self,img_h,img_w,max_text_len,char_list) -> None:
         self.img_h=img_h
@@ -119,11 +119,11 @@ class ModelIAM:
 
     def metrics(self):
         ckp = ModelCheckpoint(
-            filepath='doc/' + 'Baciu Hand' + '--{epoch:02d}--{val_loss:.3f}.h5', monitor='val_loss',
+            filepath='database/epochs/' + 'Baciu BinFinal' + '--{epoch:02d}--{val_loss:.3f}.h5', monitor='val_loss',
             verbose=1, save_best_only=True, save_weights_only=True
         )
         earlystop = EarlyStopping(
-            monitor='val_loss', min_delta=0, patience=3, verbose=0, mode='min'
+            monitor='val_loss', min_delta=0, patience=4, verbose=0, mode='min'
         )
         return ckp,earlystop
 

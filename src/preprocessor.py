@@ -38,11 +38,12 @@ class Preprocessor:
         """ Pre-process image"""
         if self.type == 'predict':
             img = cv2.imread(path)
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             img = self.fix_size(img, self.img_w, self.img_h)
 
             img = np.clip(img, 0, 255)
             img = np.uint8(img)
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
 
             #cv2.imshow("dada",img)
             #cv2.waitKey()
@@ -59,16 +60,14 @@ class Preprocessor:
             (thresh, im_bw) = cv2.threshold(im_gray, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
             img=im_bw#ingrosare
 
-
-            img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
             img = self.fix_size(img, self.img_w, self.img_h)
 
 
             img = np.clip(img, 0, 255)
             img = np.uint8(img)
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-            #cv2.imshow("dada",img)
+            #img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            #thinned = cv2.ximgproc.thinning(img)
+            #cv2.imshow("dada",thinned)
             #cv2.waitKey()
 
             #normalize the image
@@ -87,8 +86,8 @@ class Preprocessor:
         """
         w1, w2 = int((new_w - old_width) / 2), int((new_w - old_width) / 2) + old_width
         h1, h2 = int((new_h - old_height) / 2), int((new_h - old_height) / 2) + old_height
-        img_pad = np.ones([new_h, new_w, 3]) * 255 #padding white
-        img_pad[h1:h2, w1:w2,:] = img
+        img_pad = np.ones([new_h, new_w]) * 255 #padding black#############
+        img_pad[h1:h2, w1:w2] = img
         return img_pad
 
     def fix_size(self,img, target_width, target_height):

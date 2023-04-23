@@ -45,7 +45,6 @@ class DataLoaderIAM:
                 txt_lines.append(line)
 
         print(len(txt_lines))
-
         np.random.shuffle(txt_lines)
         #split train, validation, test
         split_id_1 = int(self.data_split[0] * len(txt_lines))
@@ -54,7 +53,7 @@ class DataLoaderIAM:
         validation_samples = txt_lines[split_id_1:split_id_2]
         test_samples=txt_lines[split_id_2:]
 
-
+        ###### ar trebui doar prima prima data sa schimba datele de test..., ai putea face
 
 
 
@@ -71,7 +70,7 @@ class DataLoaderIAM:
         characters = self.get_image_paths_and_labels(data_dir,validation_samples, characters,'test')
 
 
-        f = open("../model/testDataSplit.txt", "w")
+        f = open("../models/testDataPaths.txt", "w")
         for word,path in self.test_samples:
             f.write(str(word)+" word-split-path "+str(path)+"\n")
         f.close()
@@ -82,7 +81,7 @@ class DataLoaderIAM:
         # list of all characters in dataset
         self.char_list = sorted(list(characters))
 
-        f = open("../model/list.txt", "w")############
+        f = open("../models/list.txt", "w")############
         for el in self.char_list:
             f.write(el)
         f.close()
