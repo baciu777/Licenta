@@ -1,6 +1,7 @@
 import secrets
+from datetime import time
 
-from flask import Flask, flash, request, redirect, url_for, render_template, jsonify
+from flask import Flask, flash, request, redirect, url_for, render_template, jsonify,g
 import os
 import magic
 import tornado.wsgi
@@ -9,7 +10,8 @@ from werkzeug.utils import secure_filename
 from bleach import clean
 from src.model import ModelIAM
 import tensorflow as tf
-from src.segmentation import Prediction
+import threading
+from src.segmentation import Segmentation
 
 
 import cv2
@@ -20,9 +22,11 @@ from src.predict import Predict
 
 
 
-
+#13:52-cred
 
 app = Flask(__name__)
+import quart
+
 
 UPLOAD_FOLDER = 'D:/school-projects/year3sem1/licenta/summer/static/data'
 
@@ -54,20 +58,23 @@ def allowed_file(filename):
         return False
     return True
 
+import asyncio
 
 @app.route('/')
 def home():
-    #flash("")
     return "Welcome to Digital Hand! Click on the Capture Image button to capture or choose an image from gallery to perform text recognition."
 
-global ocr
-ocr= Prediction()
+#global ocr
+#ocr= Segmentation()
 
 
 
 
 @app.route('/image', methods=['POST'])
 def upload_image():
+    print('-------------------------------------')
+    ocr = Segmentation()
+
     if 'image' not in request.files:
         flash('No file part')
         return redirect(request.url)
@@ -81,7 +88,7 @@ def upload_image():
         return jsonify({'error': 'File too large'})
     file.seek(0)
     # Sanitize user input
-    filename = clean(secure_filename(file.filename))
+    filename = clean(secure_filename(file.filename[:-4]+threading.current_thread().name+'.png'))
     file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
     destination = "/".join([data_directory, filename])
     print(destination)
@@ -95,11 +102,6 @@ def upload_image():
 @app.route('/display/<filename>')
 def display_image(filename):
     return jsonify({'url': url_for('static', filename='data/' + filename)})
-"""
-@app.route('/display/<filename>')
-def display_image(filename):
-    return jsonify({'url': url_for('static', filename='data/' + filename)})
-"""
 
 
 
@@ -115,7 +117,7 @@ def start_tornado(app, port=8080):
 
 
 if __name__ == "__main__":
-    #app.run(debug=True)
-    start_tornado(app)
+    app.run(host='192.168.0.125',port=8080,threaded=True)
+    #start_tornado(app)
 
 

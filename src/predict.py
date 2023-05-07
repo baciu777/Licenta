@@ -56,12 +56,16 @@ class Predict:
         for c in out_best:
             if c < len(self.char_list):
                 outstr += self.char_list[c]
-        spell=SpellChecker()
-        outstr1=spell.correction(outstr)
-        if outstr1 is None:
-            outstr1=outstr
+        #spell=SpellChecker()
+        #outstr1=spell.correction(outstr)
+        #from spello.model import SpellCorrectionModel
+        #sp = SpellCorrectionModel(language='en')
+        #result=sp.spell_correct(outstr)
+        #print(result)
+        #if outstr1 is None:
+        #    outstr1=outstr
 
-        return outstr1
+        return outstr
 
     def has_consecutive_duplicate(self,string):
         for i in range(1, len(string)):

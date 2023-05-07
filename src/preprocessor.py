@@ -45,8 +45,8 @@ class Preprocessor:
             img = np.uint8(img)
 
 
-            #cv2.imshow("dada",img)
-            #cv2.waitKey()
+            cv2.imshow("dada",img)
+            cv2.waitKey()
 
             # normalize the image
             img = img.astype(np.float32)
