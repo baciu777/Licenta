@@ -4,6 +4,7 @@ from typing import List, Tuple
 
 import numpy as np
 import tensorflow as tf
+
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.models import Model
 from keras.layers.convolutional import Conv2D, MaxPooling2D
@@ -36,10 +37,6 @@ class ModelIAM:
     def setup_model(self,input_shape):
         # Make Network
         input_data = Input(name='the_input', shape=input_shape, dtype='float32')  # (None, 128, 64, 1)
-
-
-
-
 
         # Convolution layer (VGG)
         custom = Conv2D(64, (5, 5), padding='same',  kernel_initializer='he_normal')(input_data)  # (None, 128, 64, 64)
@@ -76,7 +73,7 @@ class ModelIAM:
         custom = Activation('relu')(custom)
 
         # CNN to RNN
-        custom = Reshape(target_shape=((32, 2048)))(custom)  # (None, 32, 2048)
+        custom = Reshape(target_shape=(32, 2048))(custom)  # (None, 32, 2048)
         custom = Dense(64, activation='relu', kernel_initializer='he_normal')(custom)  # (None, 32, 64)
 
         # RNN layer
@@ -128,11 +125,6 @@ class ModelIAM:
         return ckp,earlystop
 
 def ctc_func(args):
-    """
-    const function using connectionist temporal classification
-    y_pred is the prediction
-    labels is the true result
-    """
     y_pred, labels, input_length, label_length = args
     # the 2 is critical here since the first couple outputs of the RNN
     # tend to be garbage:

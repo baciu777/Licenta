@@ -1,17 +1,16 @@
-import argparse
 import pickle
-
 import cv2
 import lmdb
-from path import Path
 
 
 
 # 2GB is enough for IAM dataset
-env = lmdb.open('D:\school-projects\year3sem1\licenta\Iam-dataset\lmdb', map_size=1024 * 1024 * 1024 * 2)
+from src.utils import dataset_path
+
+env = lmdb.open(dataset_path + '\lmdb', map_size=1024 * 1024 * 1024 * 2)
 
 # go over all png files
-fn_imgs = list(('D:\school-projects\year3sem1\licenta\Iam-dataset\img').walkfiles('*.png'))
+fn_imgs = list((dataset_path + '\img').walkfiles('*.png'))
 
 # and put the imgs into lmdb as pickled grayscale imgs
 with env.begin(write=True) as txn:
