@@ -1,5 +1,5 @@
 import secrets
-from flask import Flask, flash, request, redirect, url_for, jsonify
+from flask import Flask, flash, request, redirect,  jsonify
 import os
 import magic
 from werkzeug.utils import secure_filename
@@ -40,19 +40,18 @@ def allowed_file(filename):
 
 @app.route('/')
 def home():
-    return "Welcome to Digital Hand! Click on the Capture Image button to capture or choose an image from gallery to perform text recognition."
+    return "Welcome to Digital Hand! Click on the capture image button to capture or choose an image from gallery to perform text recognition."
 
 
 
 session = tf.compat.v1.Session()
 tf.compat.v1.keras.backend.set_session(session)
-#global ocr###daca cu cache nu merge pune asta
-#ocr= Segmentation()
+
 
 global graph
 graph = tf.Graph()
 
-# here u create a "cache" attribute for the app.
+# you create a "cache" attribute for the app.
 app.cache = {}
 app.cache['foo'] = Segmentation()
 
@@ -60,7 +59,6 @@ app.cache['foo'] = Segmentation()
 
 @app.route('/image', methods=['POST'])
 def upload_image():
-    print('-------------------------------------')
     ocr=app.cache['foo']
     with session.as_default():
         with graph.as_default():
@@ -82,17 +80,12 @@ def upload_image():
             filename = clean(secure_filename(file.filename[:-4]+threading.current_thread().name+'.png'))
             destination = os.path.join(app.static_folder,'data', filename)
             file.save(destination)
-            print(destination)
+            #print(destination)
             prediction = ocr.predict_photo_text(destination)
             prediction_str = str(prediction)  # to be serializable to json
-            print(prediction_str)
+            #print(prediction_str)
+            os.remove(destination)
             return jsonify({'prediction': prediction_str})
-
-
-
-@app.route('/display/<filename>')
-def display_image(filename):
-    return jsonify({'url': url_for('static', filename='data/' + filename)})
 
 
 

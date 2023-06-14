@@ -7,10 +7,6 @@ from src.prediction import Prediction
 from src.train import Train
 from src.utils import database_path
 
-print("baciu")
-
-
-
 
 
 def train_main():
@@ -49,13 +45,13 @@ def main():
     """Main function."""
     #models,model_predict=train_main()
 
-    segmentation=Segmentation()
+    #segmentation=Segmentation()
 
     #train_main()
 
-    segmentation.predict_photo_text('D:/school-projects/year3sem1/licenta/summer/src/predictions/testing/new_Text.jpeg')
+    #segmentation.predict_photo_text('D:/school-projects/year3sem1/licenta/summer/src/predictions/testing/new_Text.jpeg')
 
-    #test_dataset()
+    test_dataset()
 
 
 

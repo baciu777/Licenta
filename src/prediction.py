@@ -43,10 +43,20 @@ class Prediction:
                 outstr += self.char_list[c]
         spell=SpellChecker()
         outstr1=spell.correction(outstr)
+
+        punctuations = ".:;?!,"
         if outstr1 is None:
             outstr1=outstr
-            if outstr[0].isupper():
-                outstr1[0]=outstr1[0].upper()
+        elif len(outstr)>0 and outstr[0].isupper():
+            first_letter=outstr1[0].upper()
+            outstr1=first_letter+outstr1[1:]
+        elif outstr[-1] in punctuations and len(outstr)>1:
+            outstr1 = spell.correction(outstr[:-1])
+            if outstr1 is not None:
+                outstr1=outstr1+outstr[-1]
+            else:
+                outstr1 = outstr
+
         print(outstr+"   "+outstr1)
         return outstr1
 

@@ -11,9 +11,6 @@ Sample = namedtuple('Sample', 'word, file_path')
 
 
 class DataLoaderIAM:
-    """
-    data loader for dataset IAM - words
-    """
 
     def __init__(self,data_split) -> None:
         self.data_dir = Path(dataset_path)
@@ -34,8 +31,6 @@ class DataLoaderIAM:
         for line in words:
             if line[0] == "#":
                 continue
-            if len(line.split(" ")[8]) > 16:
-                continue
             if line.split(" ")[1] != "err":  # We don't need to deal with error entries.
                 txt_lines.append(line)
         print(len(txt_lines))
@@ -55,7 +50,7 @@ class DataLoaderIAM:
         characters = self.get_image_paths_and_labels(self.data_dir, train_samples, characters, 'train')
         characters = self.get_image_paths_and_labels(self.data_dir, validation_samples, characters, 'validation')
         characters = self.get_image_paths_and_labels(self.data_dir, validation_samples, characters, 'test')
-        f = open(database_path+'/testsplitTest.txt', "w")
+        f = open(database_path+'/datasplitTest.txt', "w")
         for word, path in self.test_samples:
             f.write(str(word) + " word-split-path " + str(path) + "\n")
         f.close()

@@ -25,15 +25,20 @@ class Preprocessor:
         img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
         return img
 
+    def increase_lines_width(self, img_contrast):
+        kernel = np.ones((2,2), np.uint8)
+        img_morph = cv2.erode(img_contrast, kernel, iterations=1)
+        return img_morph
 
     def preprocess_data(self,input_data):
         if self.type == 'predict':
 
             img = self.fix_size(input_data, self.img_w, self.img_h)
-
+            img=self.increase_lines_width(img)
             img = np.clip(img, 0, 255)
             img = np.uint8(img)
-
+            #cv2.imshow("ff", img)
+            #cv2.waitKey()
 
             img = img.astype(np.float32)
             img /= 255
@@ -50,6 +55,8 @@ class Preprocessor:
 
             img = img.astype(np.float32)
             img /= 255
+            #cv2.imshow("ff", img)
+            #cv2.waitKey()
 
         return img
 
@@ -69,12 +76,12 @@ class Preprocessor:
             img = self.add_padding(img, width, height, target_width, target_height)
         elif width < target_width and height >= target_height:
             new_h = target_height
-            new_w = int(width * new_h / height)
+            new_w = max(int(width * new_h / height),1)
             new_img = cv2.resize(img, (new_w, new_h), interpolation=cv2.INTER_AREA)
             img = self.add_padding(new_img, new_w, new_h, target_width, target_height)
         elif width >= target_width and height < target_height:
             new_w = target_width
-            new_h = int(height * new_w / width)
+            new_h = max(int(height * new_w / width),1)
             new_img = cv2.resize(img, (new_w, new_h), interpolation=cv2.INTER_AREA)
             img = self.add_padding(new_img, new_w, new_h, target_width, target_height)
         else:

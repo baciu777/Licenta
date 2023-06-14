@@ -19,7 +19,6 @@ tf.compat.v1.disable_eager_execution()
 
 
 class ModelIAM:
-    """Minimalistic TF models for HTR."""
 
     def __init__(self,img_h,img_w,max_text_len,char_list) -> None:
         self.img_h=img_h
