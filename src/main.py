@@ -51,7 +51,7 @@ def main():
 
     #segmentation.predict_photo_text('D:/school-projects/year3sem1/licenta/summer/src/predictions/testing/new_Text.jpeg')
 
-    test_dataset()
+    #test_dataset()
 
 
 

@@ -50,7 +50,7 @@ class Prediction:
         elif len(outstr)>0 and outstr[0].isupper():
             first_letter=outstr1[0].upper()
             outstr1=first_letter+outstr1[1:]
-        elif outstr[-1] in punctuations and len(outstr)>1:
+        elif  len(outstr)>1 and outstr[-1] in punctuations :
             outstr1 = spell.correction(outstr[:-1])
             if outstr1 is not None:
                 outstr1=outstr1+outstr[-1]

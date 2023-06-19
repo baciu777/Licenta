@@ -33,10 +33,10 @@ class Segmentation(object):
 
 
         dilated_words=self.dilate_from_black(white_pen_img,int(img_h/115),int(img_w/150))#words
-        #cv2.imwrite("D:\school-projects\year3sem1\licenta\summer\src\predictions/process/dilated_words.jpg", dilated_words)
+        cv2.imwrite("D:\school-projects\year3sem1\licenta\summer\src\predictions/process/dilated_words.jpg", dilated_words)
 
         dilated_lines=self.dilate_lines(white_pen_img,dilated_words)
-        #cv2.imwrite("D:\school-projects\year3sem1\licenta\summer\src\predictions/process/dilated_lines.jpg", dilated_lines)
+        cv2.imwrite("D:\school-projects\year3sem1\licenta\summer\src\predictions/process/dilated_lines.jpg", dilated_lines)
 
         sorted_contours_lines=self.spot_lines(dilated_lines)
 
@@ -56,7 +56,7 @@ class Segmentation(object):
 
             if h<int(img_h/40):
                 continue
-            sorted_contour_words=self.sorted_contour_words(roi_line)
+            sorted_contour_words=self.sorted_contour_words(line,roi_line)
 
             for word in sorted_contour_words:
 
@@ -88,11 +88,11 @@ class Segmentation(object):
 
     def dilate_from_black(self,image,size_1,size_2):
         kernel = np.ones((size_1,size_2), np.uint8)
-        dilated_lines = cv2.dilate(image, kernel, iterations=1)
-        dilated_lines = cv2.morphologyEx(dilated_lines, cv2.MORPH_CLOSE,
-                              np.ones((size_1,size_2), np.uint8))
+        dilated_words = cv2.dilate(image, kernel, iterations=1)
 
-        return dilated_lines
+        return dilated_words
+
+
 
     def dilate_lines(self,image,dilated_words):#we combine 2 images: the middle of the line and the words dilation
         hpp = self.horizontal_projections(image)
@@ -101,7 +101,6 @@ class Segmentation(object):
             image[peak[0], :] = 255
 
         combined = cv2.bitwise_or(image, dilated_words)
-
 
         return combined
 
@@ -130,11 +129,15 @@ class Segmentation(object):
 
 
 
-    def sorted_contour_words(self,line):
+    def sorted_contour_words(self,full_line,line):
         # roi of each line
+        (x, y, w, h) = cv2.boundingRect(full_line)
+        dilated_line = cv2.morphologyEx(line, cv2.MORPH_CLOSE,
+                                         np.ones((int(h/10), int(w/120)), np.uint8))
+
 
         # draw contours on each word
-        (cnt, heirarchy) = cv2.findContours(line.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        (cnt, heirarchy) = cv2.findContours(dilated_line.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
 
 
         # Filter out nested contours
