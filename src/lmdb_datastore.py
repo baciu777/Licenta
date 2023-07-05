@@ -1,10 +1,6 @@
 import pickle
 import cv2
 import lmdb
-
-
-
-# 2GB is enough for IAM dataset
 from src.utils import dataset_path
 
 env = lmdb.open(dataset_path + '\lmdb', map_size=1024 * 1024 * 1024 * 2)

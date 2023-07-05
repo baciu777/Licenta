@@ -20,8 +20,6 @@ class Train:
         self.early_stopping = early_stopping
         self.batch_size = batch_size
         self.preprocessor = Preprocessor(img_h, img_w, 'train')
-        ###
-
 
     def build_data(self, samples_size, img_h, img_w, samples):
         imgs = np.zeros((samples_size, img_h, img_w))
@@ -42,7 +40,7 @@ class Train:
 
         size_train = len(self.training_data)
 
-        size_vali = len(self.validation_data)
+        size_validation = len(self.validation_data)
 
         training_generator = self.data_generator(self.training_data, self.img_h, self.img_w, self.max_text_len,
                                                  batch_size=self.batch_size)
@@ -52,7 +50,7 @@ class Train:
                                            steps_per_epoch=size_train // self.batch_size,
                                            epochs=20,
                                            validation_data=validation_generator,
-                                           validation_steps=size_vali // self.batch_size,
+                                           validation_steps=size_validation // self.batch_size,
                                            callbacks=[self.ckp, self.early_stopping], verbose=1)
 
     def data_generator(self, samples, img_h, img_w, max_text_len, batch_size):
@@ -77,7 +75,7 @@ class Train:
                 label_length[counter] = len(content)
                 counter += 1
 
-                if (counter % batch_size == 0):  # end of a batch
+                if counter % batch_size == 0:  # end of a batch
                     # print("batch")
                     counter = 0
                     inputs = {
@@ -87,7 +85,7 @@ class Train:
                         'label_length': label_length,
                     }
                     outputs = {'ctc': np.zeros([batch_size])}
-                    yield (inputs, outputs)
+                    yield inputs, outputs
                     x_train, y_train, data_length, label_length = self.batch_data(batch_size, img_h, img_w,
                                                                                   max_text_len, input_length)
 

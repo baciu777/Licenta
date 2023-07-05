@@ -1,5 +1,5 @@
 import secrets
-from flask import Flask, flash, request, redirect,  jsonify
+from flask import Flask, flash, request, redirect, jsonify
 import os
 import magic
 from werkzeug.utils import secure_filename
@@ -8,15 +8,10 @@ from src.model import ModelIAM
 import tensorflow as tf
 import threading
 from src.segmentation import Segmentation
-
 from src.prediction import Prediction
 
-
 app = Flask(__name__)
-
-
 UPLOAD_FOLDER = 'D:/school-projects/year3sem1/licenta/summer/static/data'
-
 
 app.secret_key = secrets.token_hex(16)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -38,28 +33,26 @@ def allowed_file(filename):
         return False
     return True
 
+
 @app.route('/')
 def home():
     return "Welcome to Digital Hand! Click on the capture image button to capture or choose an image from gallery to perform text recognition."
 
 
-
 session = tf.compat.v1.Session()
 tf.compat.v1.keras.backend.set_session(session)
-
 
 global graph
 graph = tf.Graph()
 
-# you create a "cache" attribute for the app.
+# create a "cache" attribute for the app.
 app.cache = {}
 app.cache['foo'] = Segmentation()
 
 
-
 @app.route('/image', methods=['POST'])
 def upload_image():
-    ocr=app.cache['foo']
+    htr = app.cache['foo']
     with session.as_default():
         with graph.as_default():
             if 'image' not in request.files:
@@ -77,21 +70,14 @@ def upload_image():
             file.seek(0)
 
             # Sanitize user input
-            filename = clean(secure_filename(file.filename[:-4]+threading.current_thread().name+'.png'))
-            destination = os.path.join(app.static_folder,'data', filename)
+            filename = clean(secure_filename(file.filename[:-4] + threading.current_thread().name + '.png'))
+            destination = os.path.join(app.static_folder, 'data', filename)
             file.save(destination)
-            #print(destination)
-            prediction = ocr.predict_photo_text(destination)
+            prediction = htr.predict_photo_text(destination)
             prediction_str = str(prediction)  # to be serializable to json
-            #print(prediction_str)
             os.remove(destination)
             return jsonify({'prediction': prediction_str})
 
 
-
-
-
 if __name__ == "__main__":
-    app.run(host='192.168.0.125',port=8080,debug=False,threaded=True)
-
-
+    app.run(host='192.168.172.201', port=8080, debug=False, threaded=True)

@@ -3,25 +3,23 @@ from collections import namedtuple
 import lmdb
 import numpy as np
 from path import Path
-
 from src.utils import dataset_path, database_path
 
 Sample = namedtuple('Sample', 'word, file_path')
 
 
-
 class DataLoaderIAM:
 
-    def __init__(self,data_split) -> None:
+    def __init__(self, data_split) -> None:
         self.data_dir = Path(dataset_path)
         assert self.data_dir.exists()
 
         self.env = lmdb.open(str(self.data_dir / 'lmdb'), readonly=True)
-        self.data_split=data_split
+        self.data_split = data_split
         self.samples = []
-        self.train_samples=[]
-        self.validation_samples=[]
-        self.test_samples=[]
+        self.train_samples = []
+        self.validation_samples = []
+        self.test_samples = []
 
         self.load_data()
 
@@ -50,18 +48,18 @@ class DataLoaderIAM:
         characters = self.get_image_paths_and_labels(self.data_dir, train_samples, characters, 'train')
         characters = self.get_image_paths_and_labels(self.data_dir, validation_samples, characters, 'validation')
         characters = self.get_image_paths_and_labels(self.data_dir, validation_samples, characters, 'test')
-        f = open(database_path+'/datasplitTest.txt', "w")
+        f = open(database_path + '/datasplitTest.txt', "w")
         for word, path in self.test_samples:
             f.write(str(word) + " word-split-path " + str(path) + "\n")
         f.close()
         # list of all characters in dataset
         self.char_list = sorted(list(characters))
-        f = open(database_path+'/characters.txt', "w")
+        f = open(database_path + '/characters.txt', "w")
         for el in self.char_list:
             f.write(el)
         f.close()
 
-    def get_image_paths_and_labels(self,data_dir,samples,characters,type_samples):
+    def get_image_paths_and_labels(self, data_dir, samples, characters, type_samples):
 
         for (i, file_line) in enumerate(samples):
             line_split = file_line.strip()
@@ -73,22 +71,21 @@ class DataLoaderIAM:
             partI = image_name.split("-")[0]
             partII = image_name.split("-")[1]
             img_path = os.path.join(
-                data_dir,'img', partI, partI + "-" + partII, image_name + ".png"
+                data_dir, 'img', partI, partI + "-" + partII, image_name + ".png"
             )
-           # the text is starting at position 9
-            words=line_split[8:]
+            # the text is starting at position 9
+            words = line_split[8:]
 
             word = ' '.join(words)
             characters = characters.union(set(list(word)))
 
             # put sample into list
             self.samples.append(Sample(word, img_path))
-            if type_samples is 'train':
+            if type_samples == 'train':
                 self.train_samples.append(Sample(word, img_path))
-            elif type_samples is 'validation':
+            elif type_samples == 'validation':
                 self.validation_samples.append(Sample(word, img_path))
             else:
-                self.test_samples.append(Sample(word,img_path))
+                self.test_samples.append(Sample(word, img_path))
 
         return characters
-
